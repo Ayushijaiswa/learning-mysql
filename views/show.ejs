@@ -30,8 +30,16 @@
 
               </form>
             </td>
+            <td>
+                <form method="get" action="/user/<%=user.id%>/delete">
+                    <button>Delete</button>
+                </form>
+            </td>
         </tr>
     <% } %>
     </table>
+    <form method="get" action="/user/insert">
+        <button>Add new user</button>
+    </form>
 </body>
 </html>

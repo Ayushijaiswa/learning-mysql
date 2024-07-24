@@ -2,6 +2,7 @@ const { faker } = require('@faker-js/faker');
 const  mysql=require("mysql2")
 const express=require("express");
 const methodOverride=require("method-override");
+const{ v4 : uuidv4 } =require('uuid');
 
 const path=require("path");
 const port =3000;
@@ -69,7 +70,7 @@ app.get('/',(req,res)=>{
      console.log(err)}
 })
 app.get('/user',(req,res)=>{
-  let q=`select * from  user`;
+  let q=`select * from  user order by username`;
   try{
     connection.query(q,(err,result)=>{
       if(err) throw err
@@ -133,4 +134,69 @@ app.patch('/user/:id',(req,res)=>{
 
  
 })
+app.get('/user/:id/delete',(req,res)=>{
+  let {id}=req.params;
+  let q=`select * from user where id='${id}'`;
+  try{
+    
+    connection.query(q,(err,result)=>{
+      if(err) throw err;
+      let data=result[0];
+      res.render("delete.ejs",{data});
+    })
+  }
+  catch(e){
+    console.log(e);
+  }
+})
+app.delete('/user/:id',(req,res)=>{
+  let {id}=req.params;
+  let{username,email,password}=req.body;
+  console.log(username);
+  console.log(email);
+  let q=`select * from user where id='${id}'`;
+  let q2=`delete  from user where id='${id}'`;
+  try{
+     connection.query(q,(err,result)=>{
+       let data=result[0];
+       console.log(data)
+       if(username===data.username && email===data.email ){
+         console.log("done");
+          try{
+            connection.query(q2,(err,result)=>{
+               res.send("deleted successfully");
+            })
+          }catch(e){
+            console.log(e);
+          }
+       }
+       else {
+        res.send("send proper info")
+       }
+     })
+  }
+  catch(e){
+    console.log(e)
+  }
+ 
+})
+app.get('/user/insert',(req,res)=>{
+  res.render("insert.ejs");
+})
+app.post('/user',(req,res)=>{
+  let{username,email,password}=req.body;
+  let id=uuidv4();
 
+  console.log(username);
+  let q="insert into user (id,username,email,password) values(?,?,?,?)";
+  let data=[id,username,email,password];
+  console.log(data);
+  try{
+    connection.query(q,data,(err,result)=>{
+      res.redirect('/user');
+    })
+  }
+  catch(e){
+    console.log(e);
+  }
+})
